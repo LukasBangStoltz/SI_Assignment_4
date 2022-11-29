@@ -38,7 +38,6 @@ namespace FeedbackService.Services
                                 var test = (consumer.Message.Value);
                                 Debug.WriteLine(test);
                                 //lav DB kald
-
                             }
                         }
                         catch (OperationCanceledException)

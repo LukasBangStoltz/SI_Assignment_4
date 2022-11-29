@@ -3,16 +3,16 @@ version: "3.4"
 services:
     
 #---------- Feedbackservice -----------
-    api-feedbackservice:
-        build:
-          context: FeedbackService/
-          dockerfile: Dockerfile
-        ports:
-          - "8080:80"
-        extra_hosts:
-          - "host.docker.internal:host-gateway"
-        depends_on:
-          - db-feedbackservice
+    # api-feedbackservice:
+    #     build:
+    #       context: FeedbackService/
+    #       dockerfile: Dockerfile
+    #     ports:
+    #       - "8080:80"
+    #     extra_hosts:
+    #       - "host.docker.internal:host-gateway"
+    #     depends_on:
+    #       - db-feedbackservice
 
     db-feedbackservice:
         image: "mcr.microsoft.com/mssql/server:2022-latest"
@@ -28,16 +28,17 @@ services:
             ACCEPT_EULA: "Y"
 
 #---------- Userservice -----------
-    api-userservice:
-        build:
-          context: UserService/
-          dockerfile: Dockerfile
-        ports:
-          - "8081:80"
-        extra_hosts:
-          - "host.docker.internal:host-gateway"
-        depends_on:
-          - db_userservice
+    # api-userservice:
+    #     build:
+    #       context: UserService/
+    #       dockerfile: Dockerfile
+    #     ports:
+    #       - "8081:80"
+    #     extra_hosts:
+    #       - "host.docker.internal:host-gateway"
+    #     depends_on:
+    #       - db_userservice
+
     db_userservice:
         image: "mcr.microsoft.com/mssql/server:2022-latest"
         extra_hosts:

@@ -1,8 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using System.Net;
-using System.Net.NetworkInformation;
-using System.Net.Sockets;
 using UserService.Context;
 using UserService.IdentityConfig;
 using UserService.Repository;
@@ -21,7 +17,6 @@ builder.Services.AddControllers().AddNewtonsoftJson(options =>
 
 
 builder.Services.AddHttpContextAccessor();
-
 
 builder.Services.AddIdentityServer()
     .AddDeveloperSigningCredential()
@@ -55,6 +50,13 @@ builder.Services.AddAuthorization();
 
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<DbApplicationContext>();
+    db.Database.Migrate();
+    db.Database.EnsureCreated();
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

@@ -1,13 +1,17 @@
-﻿namespace FeedbackService.Models
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Common.Dto
 {
-    public class Review
+    public class ReviewDto
     {
-        public int Id { get; set; }
         public int UserId { get; set; }
         public int RestaurantId { get; set; }
         public int DeliveryId { get; set; }
         public string Message { get; set; }
-        public DateTime ReviewDate { get; set; } = DateTime.UtcNow;
         public int Rating { get; set; }
     }
 }
