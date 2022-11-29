@@ -1,5 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using System.Net;
+using System.Net.NetworkInformation;
+using System.Net.Sockets;
 using UserService.Context;
 using UserService.IdentityConfig;
 using UserService.Repository;
@@ -46,6 +49,20 @@ builder.Services.AddAuthentication("token")
         options.RequireHttpsMetadata = false;
     });
 
+string output = "";
+foreach (NetworkInterface item in NetworkInterface.GetAllNetworkInterfaces())
+{
+    if (item.NetworkInterfaceType == NetworkInterfaceType.Ethernet && item.OperationalStatus == OperationalStatus.Up)
+    {
+        foreach (UnicastIPAddressInformation ip in item.GetIPProperties().UnicastAddresses)
+        {
+            if (ip.Address.AddressFamily == AddressFamily.InterNetwork)
+            {
+                output = ip.Address.ToString();
+            }
+        }
+    }
+}
 
 var app = builder.Build();
 
