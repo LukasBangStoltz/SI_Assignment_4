@@ -28,7 +28,7 @@ namespace UserService.IdentityConfig
                     AllowedGrantTypes = GrantTypes.ClientCredentials,
                     AllowedScopes = { "FeedbackService" },
                     ClientSecrets = {new Secret(feedbackServiceKey.Sha256())},
-                    AllowAccessTokensViaBrowser = true
+                    AllowAccessTokensViaBrowser = true,
                 },
 
                  new Client
@@ -38,7 +38,7 @@ namespace UserService.IdentityConfig
                     AllowedGrantTypes = GrantTypes.ResourceOwnerPassword,
                     AllowedScopes = { "UserService" },
                     ClientSecrets = {new Secret(userServiceKey.Sha256())},
-                    AllowAccessTokensViaBrowser = true
+                    AllowAccessTokensViaBrowser = true,
                 },
             };
         }

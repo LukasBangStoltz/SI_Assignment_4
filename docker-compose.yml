@@ -9,6 +9,8 @@ services:
           dockerfile: Dockerfile
         ports:
           - "8080:80"
+        extra_hosts:
+          - "host.docker.internal:host-gateway"
         depends_on:
           - db-feedbackservice
 
@@ -17,6 +19,8 @@ services:
         user: root
         ports:
           - "5434:1433"
+        extra_hosts:
+          - "host.docker.internal:host-gateway"
         volumes:
           - ./data/feedback-data:/var/opt/mssql/data  
         environment:
@@ -30,12 +34,14 @@ services:
           dockerfile: Dockerfile
         ports:
           - "8081:80"
-        
+        extra_hosts:
+          - "host.docker.internal:host-gateway"
         depends_on:
           - db_userservice
-
     db_userservice:
         image: "mcr.microsoft.com/mssql/server:2022-latest"
+        extra_hosts:
+          - "host.docker.internal:host-gateway"
         ports:
           - "5435:1433"
         volumes:

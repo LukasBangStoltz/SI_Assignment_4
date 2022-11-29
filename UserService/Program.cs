@@ -42,27 +42,17 @@ var identityServer = configuration["UserService:Host"];
 builder.Services.AddAuthentication("token")
     .AddJwtBearer("token", options =>
     {
-        options.Authority = identityServer;
+
+        options.Authority = "https://localhost:44367";
+        options.MetadataAddress = "https://localhost:44367/.well-known/openid-configuration";
         options.TokenValidationParameters.ValidateAudience = true;
         options.Audience = "UserService";
         options.TokenValidationParameters.ValidTypes = new[] { "at+jwt" };
         options.RequireHttpsMetadata = false;
     });
 
-string output = "";
-foreach (NetworkInterface item in NetworkInterface.GetAllNetworkInterfaces())
-{
-    if (item.NetworkInterfaceType == NetworkInterfaceType.Ethernet && item.OperationalStatus == OperationalStatus.Up)
-    {
-        foreach (UnicastIPAddressInformation ip in item.GetIPProperties().UnicastAddresses)
-        {
-            if (ip.Address.AddressFamily == AddressFamily.InterNetwork)
-            {
-                output = ip.Address.ToString();
-            }
-        }
-    }
-}
+builder.Services.AddAuthorization();
+
 
 var app = builder.Build();
 
@@ -81,8 +71,10 @@ app.UseCors(x => x
                     .AllowCredentials());
 
 
+    
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseIdentityServer();
