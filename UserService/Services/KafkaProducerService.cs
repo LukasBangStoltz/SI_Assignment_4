@@ -25,7 +25,7 @@ namespace UserService.Services
             try
             {
                 // Produce create_review event to kafka
-                using (var producer = new ProducerBuilder<Null, string>(config).Build())
+                using(var producer = new ProducerBuilder<Null, string>(config).Build())
                 {
                     var result = await producer.ProduceAsync(topic, new Message<Null, string>
                     {

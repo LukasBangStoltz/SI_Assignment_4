@@ -1,5 +1,7 @@
 ﻿using Common.Dto;
 using Confluent.Kafka;
+using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Writers;
 using Newtonsoft.Json;
 using System.Diagnostics;
@@ -15,14 +17,13 @@ namespace FeedbackService.Services
         private readonly IServiceProvider _serviceProvider;
 
 
-
         public ApacheKafkaConsumerService(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
 
         }
 
-        public async Task StartAsync(CancellationToken cancellationToken)
+        public Task StartAsync(CancellationToken cancellationToken)
         {
             var config = new ConsumerConfig
             {
@@ -39,7 +40,7 @@ namespace FeedbackService.Services
                     consumerBuilder.Subscribe(topic);
                     var cancelToken = new CancellationTokenSource();
 
-                    var scope = _serviceProvider.CreateScope();
+                    using var scope = _serviceProvider.CreateScope();
                     var service = scope.ServiceProvider.GetRequiredService<IReviewService>();
 
                     try
@@ -48,12 +49,32 @@ namespace FeedbackService.Services
                         {
                             var consumer = consumerBuilder.Consume
                                (cancelToken.Token);
-                            var test = (consumer.Message.Value);
+                            var test = consumer.Message.Value;
 
-                            var obj = JsonConvert.DeserializeObject<ReviewDto>(test);
 
-                            await service.SaveReview(obj);
-                            Debug.WriteLine(test);
+                            var obj = System.Text.Json.JsonSerializer.Deserialize<ReviewDto>(test);
+                            Debug.WriteLine(obj.Message);
+
+                            //service.SaveReview(obj);
+
+                            using (SqlConnection conn = new SqlConnection())
+                            {
+                                conn.ConnectionString = "Server=127.0.0.1,5434;Database=Reviews;User Id=sa;Password=S3cur3P@ssW0rd!;TrustServerCertificate=True";
+
+                                conn.Open();
+
+                                SqlCommand sqlCommand = new SqlCommand($"INSERT INTO Reviews (UserId, RestaurantId, DeliveryId, Message, ReviewDate, Rating) VALUES (@0, @1, @2, @3, @4, @5)", conn);
+                                sqlCommand.Parameters.Add(new SqlParameter("0", obj.UserId));
+                                sqlCommand.Parameters.Add(new SqlParameter("1", obj.RestaurantId));
+                                sqlCommand.Parameters.Add(new SqlParameter("2", obj.DeliveryId));
+                                sqlCommand.Parameters.Add(new SqlParameter("3", obj.Message));
+                                sqlCommand.Parameters.Add(new SqlParameter("4", DateTime.UtcNow));
+                                sqlCommand.Parameters.Add(new SqlParameter("5", obj.Rating));
+
+                                sqlCommand.ExecuteNonQuery();
+
+                            }
+
                             //lav DB kald
                         }
                     }
