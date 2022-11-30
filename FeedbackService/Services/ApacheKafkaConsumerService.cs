@@ -1,64 +1,78 @@
 ﻿using Common.Dto;
 using Confluent.Kafka;
+using Microsoft.OpenApi.Writers;
 using Newtonsoft.Json;
 using System.Diagnostics;
 
 namespace FeedbackService.Services
 {
-        public class ApacheKafkaConsumerService : IHostedService
+    public class ApacheKafkaConsumerService : IHostedService
+    {
+        private readonly string topic = "create_review";
+        private readonly string groupId = "feedback_group";
+        private readonly string bootstrapServers = "localhost:9092";
+
+        private readonly IServiceProvider _serviceProvider;
+
+
+
+        public ApacheKafkaConsumerService(IServiceProvider serviceProvider)
         {
-            private readonly string topic = "create_review";
-            private readonly string groupId = "feedback_group";
-            private readonly string bootstrapServers = "localhost:9092";
+            _serviceProvider = serviceProvider;
 
-            public Task StartAsync(CancellationToken cancellationToken)
+        }
+
+        public async Task StartAsync(CancellationToken cancellationToken)
+        {
+            var config = new ConsumerConfig
             {
-                var config = new ConsumerConfig
-                {
-                    GroupId = groupId,
-                    BootstrapServers = bootstrapServers,
-                    AutoOffsetReset = AutoOffsetReset.Earliest
-                };
+                GroupId = groupId,
+                BootstrapServers = bootstrapServers,
+                AutoOffsetReset = AutoOffsetReset.Earliest
+            };
 
-                try
+            try
+            {
+                using (var consumerBuilder = new ConsumerBuilder
+                <Ignore, string>(config).Build())
                 {
-                    using (var consumerBuilder = new ConsumerBuilder
-                    <Ignore, string>(config).Build())
+                    consumerBuilder.Subscribe(topic);
+                    var cancelToken = new CancellationTokenSource();
+
+                    var scope = _serviceProvider.CreateScope();
+                    var service = scope.ServiceProvider.GetRequiredService<IReviewService>();
+
+                    try
                     {
-                        consumerBuilder.Subscribe(topic);
-                        var cancelToken = new CancellationTokenSource();
-                        
-                        try
+                        while (true)
                         {
-                            while (true)
-                            {
+                            var consumer = consumerBuilder.Consume
+                               (cancelToken.Token);
+                            var test = (consumer.Message.Value);
 
-                                var consumer = consumerBuilder.Consume
-                                   (cancelToken.Token);
-                                var test = (consumer.Message.Value);
+                            var obj = JsonConvert.DeserializeObject<ReviewDto>(test);
 
-                            //JsonConvert.DeserializeObject<ReviewDto>(test);
-
-                                Debug.WriteLine(test);
-                                //lav DB kald
-                            }
-                        }
-                        catch (OperationCanceledException)
-                        {
-                            consumerBuilder.Close();
+                            await service.SaveReview(obj);
+                            Debug.WriteLine(test);
+                            //lav DB kald
                         }
                     }
+                    catch (OperationCanceledException)
+                    {
+                        consumerBuilder.Close();
+                    }
                 }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine(ex.Message);
-                }
-
-                return Task.CompletedTask;
             }
-            public Task StopAsync(CancellationToken cancellationToken)
+            catch (Exception ex)
             {
-                return Task.CompletedTask;
+                System.Diagnostics.Debug.WriteLine(ex.Message);
             }
+
+            return Task.CompletedTask;
         }
+        public Task StopAsync(CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
+    }
 }

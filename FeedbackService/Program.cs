@@ -23,7 +23,7 @@ builder.Services.AddDbContext<DBApplicationContext>(options =>
 
 builder.Services.AddSingleton<IHostedService, ApacheKafkaConsumerService>();
 builder.Services.AddScoped<IReviewStorage, ReviewStorage>();
-
+builder.Services.AddScoped<IReviewService, ReviewService>();
 
 var app = builder.Build();
 

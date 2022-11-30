@@ -7,7 +7,7 @@ namespace FeedbackService.Repository
 {
     public interface IReviewStorage
     {
-        public Task<Review> CreateReview(Review review);
+        public Task<bool> CreateReview(Review review);
         public Task<Review> GetReviewByReviewId(int reviewId);
         public Task<List<Review>> GetReviewsByUserId(int userId);
         public Task<List<Review>> GetReviewsByRestaurantId(int restaurantId);
@@ -22,18 +22,17 @@ namespace FeedbackService.Repository
         {
             _dbContext = dBApplicationContext;
         }
-        public async Task<Review> CreateReview(Review review)
+        public async Task<bool> CreateReview(Review review)
         {
             try
             {
                 await _dbContext.AddAsync(review);
                 await _dbContext.SaveChangesAsync();
-                return review;
+                return true;
             }
             catch (Exception)
             {
-
-                throw;
+                return false;
             }
 
         }
