@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using UserService.Context;
 using UserService.IdentityConfig;
 using UserService.Repository;
+using UserService.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,6 +31,7 @@ builder.Services.AddDbContext<DbApplicationContext>(options =>
             options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IKafkaProducerService, KafkaProducerService>();
 
 var identityServer = configuration["UserService:Host"];
 

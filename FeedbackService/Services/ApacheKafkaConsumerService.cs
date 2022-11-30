@@ -1,13 +1,13 @@
-﻿using Confluent.Kafka;
+﻿using Common.Dto;
+using Confluent.Kafka;
+using Newtonsoft.Json;
 using System.Diagnostics;
 
 namespace FeedbackService.Services
 {
-    public class ApacheKafkaConsumer
-    {
         public class ApacheKafkaConsumerService : IHostedService
         {
-            private readonly string topic = "feedback";
+            private readonly string topic = "create_review";
             private readonly string groupId = "feedback_group";
             private readonly string bootstrapServers = "localhost:9092";
 
@@ -27,7 +27,7 @@ namespace FeedbackService.Services
                     {
                         consumerBuilder.Subscribe(topic);
                         var cancelToken = new CancellationTokenSource();
-
+                        
                         try
                         {
                             while (true)
@@ -36,6 +36,9 @@ namespace FeedbackService.Services
                                 var consumer = consumerBuilder.Consume
                                    (cancelToken.Token);
                                 var test = (consumer.Message.Value);
+
+                            //JsonConvert.DeserializeObject<ReviewDto>(test);
+
                                 Debug.WriteLine(test);
                                 //lav DB kald
                             }
@@ -58,5 +61,4 @@ namespace FeedbackService.Services
                 return Task.CompletedTask;
             }
         }
-    }
 }
