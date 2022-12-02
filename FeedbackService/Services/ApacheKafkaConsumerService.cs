@@ -72,7 +72,6 @@ namespace FeedbackService.Services
                                 sqlCommand.Parameters.Add(new SqlParameter("5", obj.Rating));
 
                                 sqlCommand.ExecuteNonQuery();
-
                             }
 
                             //lav DB kald
